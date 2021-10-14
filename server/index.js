@@ -1,8 +1,12 @@
 const express = require("express");
 const { Client } = require("pg");
+const cors = require("cors");
 
 const app = express();
 const port = 3000;
+
+app.use(cors());
+app.use(express.json());
 
 const connectionData = {
   user: "postgres",
@@ -12,22 +16,25 @@ const connectionData = {
   port: 5432,
 };
 const client = new Client(connectionData);
-var users = {};
-client.connect();
-client
-  .query("SELECT * FROM users")
-  .then((response) => {
-    console.log(response.rows);
-    users = response.rows;
-    client.end();
-  })
-  .catch((err) => {
-    console.log(err);
-    client.end();
-  });
 
-app.get("/", (req, res) => {
-  res.send(`Usuarios: ${users}`);
+//Get all users
+app.get("/api/users", (req, res) => {
+  client.connect();
+  client
+    .query("SELECT * FROM users")
+    .then((response) => {
+      console.log(response.rows);
+      res.json(response.rows);
+      client.end();
+    })
+    .catch((err) => {
+      console.log(err);
+      client.end();
+    });
+});
+
+app.get("/", function (req, res) {
+  res.send("Welcome to index");
 });
 
 app.post("/", function (req, res) {

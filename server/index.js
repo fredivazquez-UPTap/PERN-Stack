@@ -17,13 +17,12 @@ const connectionData = {
   port: 5432,
 };
 
-
 //Get all users
 app.get("/api/users", (req, res) => {
   const client = new Client(connectionData);
   client.connect();
   client
-    .query("SELECT * FROM users")
+    .query("SELECT * FROM users ORDER BY user_id ASC")
     .then((response) => {
       console.log(response.rows);
       res.json(response.rows);
@@ -76,12 +75,46 @@ app.post("/api/users", function (req, res) {
     });
 });
 
-app.put("/user", function (req, res) {
-  res.send("Got a PUT request at /user");
+//Update user by id
+app.put("/api/users/:id", function (req, res) {
+  const id = parseInt(req.params.id);
+  const { username, password, is_active } = req.body;
+  const client = new Client(connectionData);
+  client.connect();
+  client
+    .query(
+      "UPDATE users SET username = $1, password = $2, is_active = $3 WHERE user_id = $4",
+      [username, password, is_active, id]
+    )
+    .then((response) => {
+      res.json({
+        message: "User updated successfully!",
+      });
+      client.end();
+    })
+    .catch((err) => {
+      console.log(err);
+      client.end();
+    });
 });
 
-app.delete("/user", function (req, res) {
-  res.send("Got a DELETE request at /user");
+//Delete user by id
+app.delete("/api/users/:id", function (req, res) {
+  const id = parseInt(req.params.id);
+  const client = new Client(connectionData);
+  client.connect();
+  client
+    .query("DELETE FROM users WHERE user_id = $1", [id])
+    .then((response) => {
+      res.json({
+        message: "User deleted successfully!",
+      });
+      client.end();
+    })
+    .catch((err) => {
+      console.log(err);
+      client.end();
+    });
 });
 
 app.listen(port, () => {

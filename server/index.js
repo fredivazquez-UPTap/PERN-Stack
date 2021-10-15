@@ -3,7 +3,7 @@ const { Client } = require("pg");
 const cors = require("cors");
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -24,7 +24,6 @@ app.get("/api/users", (req, res) => {
   client
     .query("SELECT * FROM users ORDER BY user_id ASC")
     .then((response) => {
-      console.log(response.rows);
       res.json(response.rows);
       client.end();
     })
@@ -42,7 +41,7 @@ app.get("/api/users/:id", (req, res) => {
   client
     .query("SELECT * FROM users WHERE user_id = $1", [id])
     .then((response) => {
-      res.json(response.rows);
+      res.json(response.rows[0]);
       client.end();
     })
     .catch((err) => {
@@ -65,7 +64,7 @@ app.post("/api/users", function (req, res) {
     .then((response) => {
       res.json({
         message: "User added successfully!",
-        body: { user: { username, password, is_active } },
+        body: { user: response.rows[0] },
       });
       client.end();
     })

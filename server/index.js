@@ -33,15 +33,44 @@ app.get("/api/users", (req, res) => {
     });
 });
 
-//Get a user
-app.get("/api/users/:id", (req, res) => {
+//Get a user by id
+app.get("/api/users/id/:id", (req, res) => {
   const id = parseInt(req.params.id);
   const client = new Client(connectionData);
   client.connect();
   client
     .query("SELECT * FROM users WHERE user_id = $1", [id])
     .then((response) => {
-      res.json(response.rows[0]);
+      if (response.rowCount == 0) {
+        res.json({
+          message: "User not found!",
+        });
+      } else {
+        res.json(response.rows[0]);
+      }
+      client.end();
+    })
+    .catch((err) => {
+      console.log(err);
+      client.end();
+    });
+});
+
+//Get a user by username
+app.get("/api/users/username/:username", (req, res) => {
+  const username = req.params.username;
+  const client = new Client(connectionData);
+  client.connect();
+  client
+    .query("SELECT * FROM users WHERE username = $1", [username])
+    .then((response) => {
+      if (response.rowCount == 0) {
+        res.json({
+          message: "User not found!",
+        });
+      } else {
+        res.json(response.rows);
+      }
       client.end();
     })
     .catch((err) => {
@@ -64,7 +93,7 @@ app.post("/api/users", function (req, res) {
     .then((response) => {
       res.json({
         message: "User added successfully!",
-        body: { user: response.rows[0] },
+        body: { user: { username, password, is_active } },
       });
       client.end();
     })

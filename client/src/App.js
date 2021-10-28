@@ -3,6 +3,7 @@ import "./App.css";
 import ContactForm from "./components/contactForm/ContactForm";
 import Home from "./components/home/home";
 import About from "./components/about/About";
+import Login from "./components/login/Login";
 
 import { Container, Navbar, Nav } from "react-bootstrap";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
@@ -25,6 +26,9 @@ function App() {
             <Link className="nav-link" to="/contact">
               Contacto
             </Link>
+            <Link className="nav-link" to="/login">
+              Login
+            </Link>
           </Nav>
         </Container>
       </Navbar>
@@ -38,6 +42,9 @@ function App() {
           </Route>
           <Route exact path="/contact">
             <ContactForm />
+          </Route>
+          <Route exact path="/login">
+            <Login />
           </Route>
         </Switch>
       </Container>

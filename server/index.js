@@ -79,6 +79,8 @@ app.get("/api/users/username/:username", (req, res) => {
     });
 });
 
+//Get a user by password
+
 //Save new user
 app.post("/api/users", function (req, res) {
   const { username, password, is_active } = req.body;
@@ -137,6 +139,29 @@ app.delete("/api/users/:id", function (req, res) {
       res.json({
         message: "User deleted successfully!",
       });
+      client.end();
+    })
+    .catch((err) => {
+      console.log(err);
+      client.end();
+    });
+});
+
+//Login
+app.post("/auth/login/", (req, res) => {
+  const { username, password } = req.body;
+  const client = new Client(connectionData);
+  client.connect();
+  client
+    .query("SELECT * FROM users WHERE username = $1 AND password = $2 AND is_active = true", [username, password])
+    .then((response) => {
+      if (response.rowCount == 0) {
+        res.json({
+          message: "User not found!",
+        });
+      } else {
+        res.json(response.rows[0]);
+      }
       client.end();
     })
     .catch((err) => {

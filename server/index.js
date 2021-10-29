@@ -155,12 +155,14 @@ app.post("/auth/login/", (req, res) => {
   client
     .query("SELECT * FROM users WHERE username = $1 AND password = $2 AND is_active = true", [username, password])
     .then((response) => {
-      if (response.rowCount == 0) {
+      if (response.rowCount == 1) {
         res.json({
-          message: "User not found!",
+          is_found: true
         });
       } else {
-        res.json(response.rows[0]);
+        res.json({
+          is_found: false
+        });
       }
       client.end();
     })

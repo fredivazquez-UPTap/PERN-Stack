@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import md5 from "md5";
 import LoginJpg from "../../assets/img/auth/login.jpg";
 import {
   Container,
@@ -23,22 +24,24 @@ const axiosInstance = axios.create({
 });
 
 const Login = () => {
-  const [username, setUsername] = useState([]);
-  const [password, setPassword] = useState([]);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const onSubmitForm = (e) => {
     e.preventDefault();
     axiosInstance
       .post("auth/login", {
         username: username,
-        password: password,
+        password: md5(password),
       })
       .then((response) => {
         console.log(response.data);
         console.log(response.status);
-        console.log(response.statusText);
-        console.log(response.headers);
-        console.log(response.config);
+        if (response.data.is_found === true) {
+          alert(`Bienvenido ${username}`);
+        } else {
+          alert("El usuario y/o la contraseña son incorrectos");
+        }
       })
       .catch((error) => {
         if (error.response) {
@@ -108,6 +111,7 @@ const Login = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
                   />
                   <InputGroup.Text id="passwordAdd">
                     <FontAwesomeIcon icon={faEye} />

@@ -1,5 +1,3 @@
-import "./App.css";
-
 import ContactForm from "./components/contactForm/ContactForm";
 import Home from "./components/home/home";
 import About from "./components/about/About";

@@ -1,13 +1,16 @@
 const express = require("express");
 const { Client } = require("pg");
 const cors = require("cors");
+const e = require("express");
 
 const app = express();
-const port = 3001;
+var corsOptions = {
+  origin: "http://localhost:3000",
+};
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 const connectionData = {
   user: "postgres",
@@ -79,8 +82,6 @@ app.get("/api/users/username/:username", (req, res) => {
     });
 });
 
-//Get a user by password
-
 //Save new user
 app.post("/api/users", function (req, res) {
   const { username, password, is_active } = req.body;
@@ -147,21 +148,20 @@ app.delete("/api/users/:id", function (req, res) {
     });
 });
 
-//Login
-app.post("/auth/login/", (req, res) => {
+//Signin
+app.post("/api/auth/signin/", (req, res) => {
   const { username, password } = req.body;
   const client = new Client(connectionData);
   client.connect();
   client
-    .query("SELECT * FROM users WHERE username = $1 AND password = $2 AND is_active = true", [username, password])
+    .query(
+      "SELECT * FROM users WHERE username = $1 AND password = $2 AND is_active = true",
+      [username, password]
+    )
     .then((response) => {
       if (response.rowCount == 1) {
-        res.json({
-          is_found: true
-        });
-      } else {
-        res.json({
-          is_found: false
+        res.send({
+          token: "token123",
         });
       }
       client.end();
@@ -172,6 +172,7 @@ app.post("/auth/login/", (req, res) => {
     });
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}.`);
 });

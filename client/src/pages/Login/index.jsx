@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
-import md5 from "md5";
-import LoginJpg from "../../assets/img/auth/login.jpg";
+import { useDispatch, useSelector } from "react-redux";
+import { Redirect, Link } from "react-router-dom";
 import {
   Container,
   Row,
@@ -13,54 +12,44 @@ import {
   Button,
   Image,
   Card,
+  ToggleButton,
+  Spinner,
+  Alert,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye } from "@fortawesome/free-regular-svg-icons";
+import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { faGoogle, faFacebook } from "@fortawesome/free-brands-svg-icons";
 
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:3001/",
-  timeout: 1000,
-});
+import { login } from "../../actions/auth";
+import LoginJpg from "../../assets/img/auth/login.jpg";
 
-const Login = () => {
+const Login = (props) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const onSubmitForm = (e) => {
+  const { isLoggedIn } = useSelector((state) => state.auth);
+  const { message } = useSelector((state) => state.message);
+
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    axiosInstance
-      .post("auth/login", {
-        username: username,
-        password: md5(password),
+    setLoading(true);
+    dispatch(login(username, password))
+      .then(() => {
+        props.history.push("/");
+        window.location.reload();
       })
-      .then((response) => {
-        console.log(response.data);
-        console.log(response.status);
-        if (response.data.is_found === true) {
-          alert(`Bienvenido ${username}`);
-        } else {
-          alert("El usuario y/o la contraseña son incorrectos");
-        }
-      })
-      .catch((error) => {
-        if (error.response) {
-          // La respuesta fue hecha y el servidor respondió con un código de estado
-          // que esta fuera del rango de 2xx
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // La petición fue hecha pero no se recibió respuesta
-          // `error.request` es una instancia de XMLHttpRequest en el navegador y una instancia de
-          // http.ClientRequest en node.js
-          console.log(error.request);
-        } else {
-          // Algo paso al preparar la petición que lanzo un Error
-          console.log("Error", error.message);
-        }
-        console.log(error.config);
+      .catch(() => {
+        setLoading(false);
       });
+    setLoading(false);
+
+    if (isLoggedIn) {
+      return <Redirect to="/" />;
+    }
   };
 
   return (
@@ -77,8 +66,8 @@ const Login = () => {
                 Ingresa tus credenciales para acceder a tu cuenta.
               </p>
             </div>
-            <Form method="post" onSubmit={onSubmitForm}>
-              <FormGroup className="mb-3" controlId="email">
+            <Form onSubmit={handleSubmit}>
+              <FormGroup className="mb-3" controlId="username">
                 <Form.Label>Usuario</Form.Label>
                 <Form.Control
                   type="text"
@@ -94,28 +83,33 @@ const Login = () => {
                     <Form.Label htmlFor="password">Contraseña</Form.Label>
                   </Col>
                   <Col className="col-auto">
-                    <a
-                      href="/"
+                    <Link
+                      to="/"
                       className="small text-muted text-decoration-none"
                     >
                       ¿Olvidó su contraseña?
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
 
                 <InputGroup className="mb-3">
                   <FormControl
                     id="password"
-                    aria-describedby="passwordAdd"
                     placeholder="***********"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
-                  <InputGroup.Text id="passwordAdd">
-                    <FontAwesomeIcon icon={faEye} />
-                  </InputGroup.Text>
+                  <ToggleButton
+                    id="toggle-check"
+                    type="checkbox"
+                    variant="outline-secondary"
+                    checked={showPassword}
+                    onChange={(e) => setShowPassword(e.currentTarget.checked)}
+                  >
+                    <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
+                  </ToggleButton>
                 </InputGroup>
               </div>
               <Form.Group className="mb-3" controlId="remember-me">
@@ -125,28 +119,43 @@ const Login = () => {
                   label="Recordar contraseña"
                 />
               </Form.Group>
+
+              {message && (
+                <Alert variant="warning">
+                  {message}
+                </Alert>
+              )}
               <div className="d-grid mb-3 text-center">
-                <Button variant="primary" type="submit">
-                  Iniciar sesión
-                </Button>
+                {isLoading ? (
+                  <Button variant="primary" disabled>
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                    />{" "}
+                    Cargando...
+                  </Button>
+                ) : (
+                  <Button variant="primary" type="submit">
+                    Iniciar sesión
+                  </Button>
+                )}
               </div>
             </Form>
             <div className="text-center">
               <p className="text-muted mb-0">
                 ¿Aún no tienes una cuenta?{" "}
-                <a href="/" className="text-decoration-none">
+                <Link to="/" className="text-decoration-none">
                   Regístrate aquí
-                </a>
+                </Link>
               </p>
             </div>
             <div className="border-top mt-3 pt-3 d-grid gap-2">
-              <Button variant="outline-danger">
-                <FontAwesomeIcon icon={faGoogle} /> Iniciar sesión con Google
-              </Button>{" "}
-              <Button variant="outline-primary">
-                <FontAwesomeIcon icon={faFacebook} /> Iniciar sesión con
-                Facebook
-              </Button>{" "}
+              <p className="text-muted text-center">
+                Todos los derechos reservados | 2021
+              </p>
             </div>
           </Card>
         </Col>

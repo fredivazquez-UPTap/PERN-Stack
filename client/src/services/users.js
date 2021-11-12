@@ -1,17 +1,13 @@
 import axios from "axios";
-import CryptoJS from "crypto-js";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:3001/api",
 });
 
-export default async function login({ email, password }) {
+export default async function getUsers() {
   try {
-    const response = await axiosInstance.post("/auth/signin", {
-      email: email,
-      password: password,
-    });
-    return response.data.user;
+    const response = await axiosInstance.get("/users");
+    return response.data;
   } catch (error) {
     if (error.response) {
       console.log(error.response.data);

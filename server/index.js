@@ -25,7 +25,7 @@ app.get("/api/users", (req, res) => {
   const client = new Client(connectionData);
   client.connect();
   client
-    .query("SELECT * FROM users ORDER BY user_id ASC")
+    .query("SELECT u.*, r.role_name FROM users u INNER JOIN roles r ON u.role_id = r.role_id ORDER BY u.user_id ASC")
     .then((response) => {
       res.json(response.rows);
       client.end();
@@ -150,18 +150,18 @@ app.delete("/api/users/:id", function (req, res) {
 
 //Signin
 app.post("/api/auth/signin/", (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
   const client = new Client(connectionData);
   client.connect();
   client
     .query(
-      "SELECT * FROM users WHERE username = $1 AND password = $2 AND is_active = true",
-      [username, password]
+      "SELECT * FROM users WHERE email = $1 AND password = $2 AND is_active = true",
+      [email, password]
     )
     .then((response) => {
       if (response.rowCount == 1) {
         res.send({
-          token: "token123",
+          user: response.rows,
         });
       }
       client.end();

@@ -25,7 +25,9 @@ app.get("/api/users", (req, res) => {
   const client = new Client(connectionData);
   client.connect();
   client
-    .query("SELECT u.*, r.role_name FROM users u INNER JOIN roles r ON u.role_id = r.role_id ORDER BY u.user_id ASC")
+    .query(
+      "SELECT u.*, r.role_name FROM users u INNER JOIN roles r ON u.role_id = r.role_id ORDER BY u.user_id ASC"
+    )
     .then((response) => {
       res.json(response.rows);
       client.end();
@@ -149,25 +151,30 @@ app.delete("/api/users/:id", function (req, res) {
 });
 
 //Signin
-app.post("/api/auth/signin/", (req, res) => {
+app.post("/api/auth/signin", (req, res) => {
   const { email, password } = req.body;
   const client = new Client(connectionData);
   client.connect();
   client
-    .query(
-      "SELECT * FROM users WHERE email = $1 AND password = $2 AND is_active = true",
-      [email, password]
-    )
+    .query("SELECT * FROM users WHERE email = $1 AND password = $2", [
+      email,
+      password,
+    ])
     .then((response) => {
       if (response.rowCount == 1) {
-        res.send({
-          user: response.rows,
-        });
+        if (response.rows[0].is_active === false) {
+          res.status(401).send({ error: 'Something failed!' });
+        } else {
+          res.send({
+            user: response.rows[0],
+          });
+        }
+      } else {
+        res.status(401).send({ error: 'Something failed!' });
       }
       client.end();
     })
     .catch((err) => {
-      console.log(err);
       client.end();
     });
 });

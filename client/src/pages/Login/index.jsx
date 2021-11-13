@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import axios from "axios";
+import SHA512 from "crypto-js/sha512";
+
 import {
   Container,
   Row,
@@ -13,11 +16,11 @@ import {
   Card,
   ToggleButton,
   Spinner,
+  Alert,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 
-import login from "../../services/login.js";
 import LoginJpg from "../../assets/img/auth/login.jpg";
 
 const Login = () => {
@@ -28,16 +31,23 @@ const Login = () => {
   const [isLoading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      const user = login(email, password);
-      setUser(user);
-    } catch (error) {
-      setError(error);
-      setLoading(false);
-    }
+    const pass = SHA512(password).toString();
+    axios
+      .post("http://localhost:3001/api/auth/signin", {
+        email: email,
+        password: pass,
+      })
+      .then((response) => {
+        setUser(response.data);
+      })
+      .catch((error) => {
+        console.log(error.toJSON());
+        setError(error);
+        setLoading(false);
+      });
     setLoading(false);
   };
 
@@ -50,7 +60,11 @@ const Login = () => {
             <Image src={LoginJpg} fluid />
           </Col>
           <Col md={6} className="p-0 px-xl-5">
-            {error && <p>{error.message}</p>}
+            {error && (
+              <Alert variant="danger">
+                {error.name}: {error.message}
+              </Alert>
+            )}
             <Card body className="p-0 p-md-2 p-lg-4 m-0 mx-xl-5 border-0">
               <div className="mb-4 text-center">
                 <h1 className="display-4 text-center mb-2">Iniciar sesión</h1>

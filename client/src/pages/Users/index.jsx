@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, InputGroup, FormControl } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faTimes, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { faEdit, faTrashAlt } from "@fortawesome/free-regular-svg-icons";
+import { faSearch, faUserEdit, faUserLock, faUserCheck } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 
 const Users = () => {
@@ -37,7 +36,7 @@ const Users = () => {
             <th>Usuario</th>
             <th>Email</th>
             <th>Rol</th>
-            <th>Activo</th>
+            <th>Estado</th>
             <th>Registro</th>
             <th>Última modificación</th>
             <th>Opciones</th>
@@ -56,18 +55,19 @@ const Users = () => {
                 <td>{user.role_name}</td>
                 <td>
                   <FontAwesomeIcon
-                    icon={user.is_active ? faCheck : faTimes}
+                    icon={user.is_active ? faUserCheck : faUserLock}
                     className={user.is_active ? "text-success" : "text-danger"}
-                  />
+                  />{" "}
+                  {user.is_active ? "Activo" : "Inactivo"}
                 </td>
                 <td>{new Date(user.created_at).toLocaleTimeString()}</td>
                 <td>{new Date(user.modified_at).toLocaleString()}</td>
                 <td>
                   <Button variant="outline-success">
-                    <FontAwesomeIcon icon={faEdit} />
+                    <FontAwesomeIcon icon={faUserEdit} />
                   </Button>{" "}
                   <Button variant="outline-danger">
-                    <FontAwesomeIcon icon={faTrashAlt} />
+                    <FontAwesomeIcon icon={faUserLock} />
                   </Button>
                 </td>
               </tr>

@@ -1,9 +1,12 @@
 const express = require("express");
 const { Client } = require("pg");
 const cors = require("cors");
-const e = require("express");
-
+const dotenv = require("dotenv");
+dotenv.config();
+const auth = require("./controllers/auth");
+const users = require("./controllers/users");
 const app = express();
+
 var corsOptions = {
   origin: "http://localhost:3000",
 };
@@ -11,6 +14,8 @@ var corsOptions = {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors(corsOptions));
+app.use("/api/auth", auth);
+app.use("/api/users", users);
 
 const connectionData = {
   user: "postgres",
@@ -19,24 +24,6 @@ const connectionData = {
   password: "1234567890",
   port: 5432,
 };
-
-//Get all users
-app.get("/api/users", (req, res) => {
-  const client = new Client(connectionData);
-  client.connect();
-  client
-    .query(
-      "SELECT u.*, r.role_name FROM users u INNER JOIN roles r ON u.role_id = r.role_id ORDER BY u.user_id ASC"
-    )
-    .then((response) => {
-      res.json(response.rows);
-      client.end();
-    })
-    .catch((err) => {
-      console.log(err);
-      client.end();
-    });
-});
 
 //Get a user by id
 app.get("/api/users/id/:id", (req, res) => {
@@ -163,14 +150,14 @@ app.post("/api/auth/signin", (req, res) => {
     .then((response) => {
       if (response.rowCount == 1) {
         if (response.rows[0].is_active === false) {
-          res.status(401).send({ error: 'Something failed!' });
+          res.status(401).send({ error: "Something failed!" });
         } else {
           res.send({
             user: response.rows[0],
           });
         }
       } else {
-        res.status(401).send({ error: 'Something failed!' });
+        res.status(401).send({ error: "Something failed!" });
       }
       client.end();
     })

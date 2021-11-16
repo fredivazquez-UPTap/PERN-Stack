@@ -26,34 +26,35 @@ import LoginJpg from "../../assets/img/auth/login.jpg";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
+  const [jwt, setJwt] = useState(localStorage.getItem("token") || null);
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     const pass = SHA512(password).toString();
-    axios
-      .post("http://localhost:3001/api/auth/signin", {
-        email: email,
-        password: pass,
-      })
-      .then((response) => {
-        setUser(response.data);
-      })
-      .catch((error) => {
-        console.log(error.toJSON());
-        setError(error);
-        setLoading(false);
-      });
+    try {
+      const { data } = await axios.post(
+        "http://localhost:3001/api/auth/signin",
+        {
+          email: email,
+          password: pass,
+        }
+      );
+      setJwt(data.token);
+      localStorage.setItem("token", data.token);
+    } catch (err) {
+      setError(err);
+      console.log(err.message);
+    }
     setLoading(false);
   };
 
   return (
     <>
-      {user && <Navigate to="/" replace={true} />}
+      {jwt && <Navigate to="/" replace={true} />}
       <Container>
         <Row className="justify-content-center align-items-center d-flex vh-100">
           <Col md={6}>
@@ -72,7 +73,7 @@ const Login = () => {
                   Ingresa tus credenciales para acceder a tu cuenta.
                 </p>
               </div>
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleLogin}>
                 <FormGroup className="mb-3" controlId="email">
                   <Form.Label>Correo electrónico</Form.Label>
                   <Form.Control

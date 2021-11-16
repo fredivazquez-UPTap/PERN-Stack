@@ -60,7 +60,7 @@ const Users = () => {
                   />{" "}
                   {user.is_active ? "Activo" : "Inactivo"}
                 </td>
-                <td>{new Date(user.created_at).toLocaleTimeString()}</td>
+                <td>{new Date(user.created_at).toLocaleString()}</td>
                 <td>{new Date(user.modified_at).toLocaleString()}</td>
                 <td>
                   <Button variant="outline-success">

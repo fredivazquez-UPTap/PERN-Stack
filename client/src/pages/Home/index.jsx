@@ -2,7 +2,8 @@ import { Container } from "react-bootstrap";
 
 import Navigation from "../../components/Navigation";
 
-function Home() {
+const Home = () => {
+  
   return (
     <>
     <Navigation/>

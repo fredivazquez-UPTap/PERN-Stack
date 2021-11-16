@@ -16,6 +16,9 @@ export default function Navigation() {
           <Link className="nav-link" to="/contact">
             Contacto
           </Link>
+          <Link className="nav-link" to="/users">
+            Usuarios
+          </Link>
         </Nav>
       </Container>
     </Navbar>

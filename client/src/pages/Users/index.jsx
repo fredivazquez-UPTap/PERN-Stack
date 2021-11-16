@@ -29,7 +29,7 @@ const Users = () => {
           }}
         />
       </InputGroup>
-      <Table striped bordered hover responsive="sm" className="text-center">
+      <Table striped bordered hover className="text-center">
         <thead>
           <tr>
             <th>#</th>

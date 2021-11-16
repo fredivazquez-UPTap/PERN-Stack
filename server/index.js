@@ -1,8 +1,6 @@
 const express = require("express");
 const { Client } = require("pg");
 const cors = require("cors");
-const dotenv = require("dotenv");
-dotenv.config();
 const auth = require("./controllers/auth");
 const users = require("./controllers/users");
 const app = express();
@@ -133,35 +131,6 @@ app.delete("/api/users/:id", function (req, res) {
     })
     .catch((err) => {
       console.log(err);
-      client.end();
-    });
-});
-
-//Signin
-app.post("/api/auth/signin", (req, res) => {
-  const { email, password } = req.body;
-  const client = new Client(connectionData);
-  client.connect();
-  client
-    .query("SELECT * FROM users WHERE email = $1 AND password = $2", [
-      email,
-      password,
-    ])
-    .then((response) => {
-      if (response.rowCount == 1) {
-        if (response.rows[0].is_active === false) {
-          res.status(401).send({ error: "Something failed!" });
-        } else {
-          res.send({
-            user: response.rows[0],
-          });
-        }
-      } else {
-        res.status(401).send({ error: "Something failed!" });
-      }
-      client.end();
-    })
-    .catch((err) => {
       client.end();
     });
 });

@@ -23,25 +23,36 @@ router.post("/signin", async (request, response) => {
     ]);
     if (result.rowCount == 1) {
       const user = result.rows[0];
-      if (password == user.password) {
-        const userForToken = {
-          id: user.user_id,
-          username: user.username,
-          email,
-          is_active: user.is_active,
-        };
-        const token = jsonwebtoken.sign(userForToken, process.env.JWT_SECRET, {
-          expiresIn: process.env.TOKEN_EXPIRES_IN,
-        });
-        response.json({ token });
+      if (user.is_active) {
+        if (password == user.password) {
+          const userForToken = {
+            id: user.user_id,
+            username: user.username,
+            email,
+            is_active: user.is_active,
+          };
+          const token = jsonwebtoken.sign(
+            userForToken,
+            process.env.JWT_SECRET,
+            {
+              expiresIn: process.env.TOKEN_EXPIRES_IN,
+            }
+          );
+          console.log(`token api: ${token}`);
+          response.json({ token });
+        } else {
+          response.status(401).json({
+            error: "Contraseña incorrecta.",
+          });
+        }
       } else {
         response.status(401).json({
-          error: "Contraseña incorrecta",
+          error: "Usuario inactivo.",
         });
       }
     } else {
       response.status(401).json({
-        error: "Usuario incorrecto.",
+        error: "Correo electrónico incorrecto.",
       });
     }
     response.json({

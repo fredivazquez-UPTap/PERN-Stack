@@ -1,24 +1,31 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Home from "./pages/Home";
-import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Users from "./pages/Users";
-import ErrorPage from "./pages/ErrorPage";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import NotFound from "./pages/NotFound";
 import User from "./pages/Users/components/User";
+import NewUserForm from "./pages/Users/components/User";
+import Layout from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route index element={<Home />} />
-        <Route path="login" element={<Login />} />
-        <Route path="signup" element={<Signup />} />
-        <Route path="users" element={<Users />}>
-          <Route path=":userId" element={User}/>
+        <Route element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="about" element={<About />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="users" element={<Users />}>
+            <Route path=":userId" element={User} />
+            <Route path="new" element={NewUserForm} />
+          </Route>
         </Route>
-        <Route path="*" element={<ErrorPage />} />
+        <Route path="login" element={<Login />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

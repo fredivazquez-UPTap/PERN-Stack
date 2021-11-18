@@ -30,6 +30,7 @@ router.post("/signin", async (request, response) => {
             username: user.username,
             email,
             is_active: user.is_active,
+            role_id: user.role_id,
           };
           const token = jsonwebtoken.sign(
             userForToken,
@@ -38,28 +39,31 @@ router.post("/signin", async (request, response) => {
               expiresIn: process.env.TOKEN_EXPIRES_IN,
             }
           );
-          console.log(`token api: ${token}`);
           response.json({ token });
+          client.end();
         } else {
           response.status(401).json({
             error: "Contraseña incorrecta.",
           });
+          client.end();
         }
       } else {
         response.status(401).json({
           error: "Usuario inactivo.",
         });
+        client.end();
       }
     } else {
       response.status(401).json({
         error: "Correo electrónico incorrecto.",
       });
+      client.end();
     }
-    response.json({
-      user: user,
-    });
   } catch (err) {
-    console.log(err);
+    response.status(401).json({
+      error: err.message,
+    });
+    client.end();
   }
 });
 

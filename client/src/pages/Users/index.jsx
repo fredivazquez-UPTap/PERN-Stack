@@ -1,22 +1,40 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Table, Button, InputGroup, FormControl } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faUserEdit, faUserLock, faUserCheck } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSearch,
+  faUserEdit,
+  faUserLock,
+  faUserCheck,
+} from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 
 const Users = () => {
+  const jwt = localStorage.getItem("token");
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3001/api/users").then((response) => {
-      setUsers(response.data);
+    getUsers(jwt);
+  }, [jwt]);
+
+  const getUsers = async (token) => {
+    const instance = axios.create({
+      baseURL: "http://localhost:3001/api",
+      headers: { Authorization: `Bearer ${token}` },
     });
-  });
+    try {
+      const { data } = await instance.get("/users");
+      setUsers(data);
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
 
   return (
     <div>
-      <h1>Usuarios</h1>
       <InputGroup className="mb-3">
         <InputGroup.Text id="searchInput">
           <FontAwesomeIcon icon={faSearch} />
@@ -63,7 +81,10 @@ const Users = () => {
                 <td>{new Date(user.created_at).toLocaleString()}</td>
                 <td>{new Date(user.modified_at).toLocaleString()}</td>
                 <td>
-                  <Button variant="outline-success">
+                  <Button
+                    variant="outline-success"
+                    onClick={() => navigate(`/users/${user.user_id}`)}
+                  >
                     <FontAwesomeIcon icon={faUserEdit} />
                   </Button>{" "}
                   <Button variant="outline-danger">

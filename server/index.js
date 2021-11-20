@@ -23,51 +23,6 @@ const connectionData = {
   port: 5432,
 };
 
-//Get a user by id
-app.get("/api/users/id/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const client = new Client(connectionData);
-  client.connect();
-  client
-    .query("SELECT * FROM users WHERE user_id = $1", [id])
-    .then((response) => {
-      if (response.rowCount == 0) {
-        res.json({
-          message: "User not found!",
-        });
-      } else {
-        res.json(response.rows[0]);
-      }
-      client.end();
-    })
-    .catch((err) => {
-      console.log(err);
-      client.end();
-    });
-});
-
-//Get a user by username
-app.get("/api/users/username/:username", (req, res) => {
-  const username = req.params.username;
-  const client = new Client(connectionData);
-  client.connect();
-  client
-    .query("SELECT * FROM users WHERE username = $1", [username])
-    .then((response) => {
-      if (response.rowCount == 0) {
-        res.json({
-          message: "User not found!",
-        });
-      } else {
-        res.json(response.rows);
-      }
-      client.end();
-    })
-    .catch((err) => {
-      console.log(err);
-      client.end();
-    });
-});
 
 //Save new user
 app.post("/api/users", function (req, res) {
@@ -84,29 +39,6 @@ app.post("/api/users", function (req, res) {
       res.json({
         message: "User added successfully!",
         body: { user: { username, password, is_active } },
-      });
-      client.end();
-    })
-    .catch((err) => {
-      console.log(err);
-      client.end();
-    });
-});
-
-//Update user by id
-app.put("/api/users/:id", function (req, res) {
-  const id = parseInt(req.params.id);
-  const { username, password, is_active } = req.body;
-  const client = new Client(connectionData);
-  client.connect();
-  client
-    .query(
-      "UPDATE users SET username = $1, password = $2, is_active = $3 WHERE user_id = $4",
-      [username, password, is_active, id]
-    )
-    .then((response) => {
-      res.json({
-        message: "User updated successfully!",
       });
       client.end();
     })

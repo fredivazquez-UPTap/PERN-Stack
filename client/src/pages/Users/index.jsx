@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Table, Button, InputGroup, FormControl } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { Table, InputGroup, FormControl } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
@@ -12,26 +12,25 @@ import axios from "axios";
 
 const Users = () => {
   const jwt = localStorage.getItem("token");
-  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
-
+  
   useEffect(() => {
-    getUsers(jwt);
-  }, [jwt]);
-
-  const getUsers = async (token) => {
-    const instance = axios.create({
-      baseURL: "http://localhost:3001/api",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    try {
-      const { data } = await instance.get("/users");
-      setUsers(data);
-    } catch (err) {
-      console.log(err.message);
+    async function fetchData() {
+      try {
+        const { data } = await axios
+          .create({
+            baseURL: "http://localhost:3001/api",
+            headers: { Authorization: `Bearer ${jwt}` },
+          })
+          .get("/users");
+        setUsers(data);
+      } catch (err) {
+        console.log(err.message);
+      }
     }
-  };
+    fetchData();
+  }, [jwt]);
 
   return (
     <div>
@@ -81,15 +80,12 @@ const Users = () => {
                 <td>{new Date(user.created_at).toLocaleString()}</td>
                 <td>{new Date(user.modified_at).toLocaleString()}</td>
                 <td>
-                  <Button
-                    variant="outline-success"
-                    onClick={() => navigate(`/users/${user.user_id}`)}
+                  <Link
+                    to={`/users/${user.user_id}`}
+                    className="btn btn-outline-success"
                   >
                     <FontAwesomeIcon icon={faUserEdit} />
-                  </Button>{" "}
-                  <Button variant="outline-danger">
-                    <FontAwesomeIcon icon={faUserLock} />
-                  </Button>
+                  </Link>{" "}
                 </td>
               </tr>
             ))}
